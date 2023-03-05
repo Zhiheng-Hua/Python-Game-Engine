@@ -16,7 +16,7 @@ test_object = BaseObject(Mesh(vertices=np.array(
 )))
 
 class GUI:
-    WINDOW_SIZE = (700, 500)  # width, height
+    WINDOW_SIZE = (900, 600)  # width, height
 
     def __init__(self):
         self.__window = tk.Tk()
@@ -28,13 +28,10 @@ class GUI:
 
         # main camera
         self.__main_camera = Camera(self.__window)
-        self.__main_camera.show()
+        self.__main_camera.get_canvas().grid(column=0, row=0)
 
     def __render(self):
         self.__main_camera.render_objects(self.__objects)
-
-    def root_window(self):
-        return self.__window
 
     def start(self):
         self.__render()
