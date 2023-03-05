@@ -8,7 +8,7 @@ class Camera(BaseObject):
     CANVAS_SIZE = (700, 500)
     GRID_SCALE = 100
     DEFAULT_FOCAL_LENGTH = 20
-    DEFAULT_CAMERA_POSITION = np.array([-50, 0, 0])
+    DEFAULT_CAMERA_POSITION = np.array([0, -50, 0])
 
     def __init__(self, root_window: tk.Tk, position=None):
         super().__init__(position if position else self.DEFAULT_CAMERA_POSITION)
@@ -21,17 +21,18 @@ class Camera(BaseObject):
     def render(self, objects):
         self.__canvas.delete("all")
         for obj in objects:
-            pos = obj.position
-            for x, y, z in Util.rotated_row_vectors(self.basis.T, pos + obj.vertices - self.position):
-                ry, rz = self.__focal_length / x * np.array([y, z])
-                self.__draw_vertex(ry, rz)
+            for x, y, z in Util.rotated_row_vectors(self.basis.T, obj.position + obj.vertices - self.position):
+                if y <= 0:
+                    continue
+                rx, rz = self.__focal_length / y * np.array([x, z])
+                self.__draw_vertex(rx, rz)
 
     def __draw_faces(self):
         # TODO
         pass
 
-    def __draw_vertex(self, y, z):
-        x, y = np.array([y, -z]) * self.GRID_SCALE + self.__window_origin
+    def __draw_vertex(self, x, z):
+        x, y = np.array([x, -z]) * self.GRID_SCALE + self.__window_origin
         self.__canvas.create_rectangle(x - 1, y - 1, x + 1, y + 1, fill="black")
 
     def get_canvas(self):

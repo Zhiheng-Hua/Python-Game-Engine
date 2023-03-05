@@ -14,7 +14,16 @@ class BaseObject:
 
     def move(self, direction):
         """direction vector is in local coordinate system"""
-        self.position = self.position + self.basis.T @ (direction * self.speed)
+        self.position = self.position + direction * self.speed
+
+    def x_direction(self):
+        return self.basis[0]
+
+    def y_direction(self):
+        return self.basis[1]
+
+    def z_direction(self):
+        return self.basis[2]
 
     # this can be used by children class to handle rotation
     def _rotate_basis(self, R):
