@@ -5,6 +5,8 @@ from gui import GUI
 
 # window = tk.Tk()
 #
+# window.geometry('300x400')
+#
 # canvas = tk.Canvas(window, bg="white", width=700, height=500)
 # canvas.grid(column=0, row=0)
 #
