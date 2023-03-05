@@ -1,7 +1,11 @@
 import numpy as np
 import tkinter as tk
+
+from typing import List
+
 from util import Util
 from base_object import BaseObject
+from mesh_object import MeshObject
 
 
 class Camera(BaseObject):
@@ -21,19 +25,42 @@ class Camera(BaseObject):
     def render(self, objects):
         self.__canvas.delete("all")
         for obj in objects:
-            for x, y, z in Util.rotated_row_vectors(self.basis.T, obj.position + obj.vertices - self.position):
+            for pl in self.__object_face_list_to_render(obj):
+                self.__draw_face(pl)
+
+    def __filter_faces(self, obj: MeshObject) -> List[np.array]:
+        """filter faces to exclude back-facing faces, return list of faces in object's 3d coordinate system"""
+        res = []
+        for face in obj.faces:
+            # face vertices in world coordinate
+            face_vertices = np.array([obj.vertices[i - 1] for i in face]) + obj.position
+            # print(face_vertices)
+            f_normal = np.cross(face_vertices[1] - face_vertices[0], face_vertices[2] - face_vertices[1])
+            if np.dot(self.y_direction(), f_normal) < 0:    # face toward each other
+                res.append(face_vertices)
+        return res
+
+    def __object_face_list_to_render(self, obj: MeshObject) -> List[list]:
+        """return array of screen-coordinated faces[face_on_screen, ...] from a mesh object"""
+        face_list = self.__filter_faces(obj)
+        # convert faces in face_list to screen coordinate
+        res = []
+        for face_vertices in face_list:
+            temp = []
+            for x, y, z in Util.rotated_row_vectors(self.basis.T, obj.position + face_vertices - self.position):
                 if y <= 0:
-                    continue
-                rx, rz = self.__focal_length / y * np.array([x, z])
-                self.__draw_vertex(rx, rz)
+                    return []
+                temp.append([x / y, -z / y])
+            face_on_screen = np.array(temp) * self.GRID_SCALE * self.__focal_length + self.__window_origin
+            res.append(face_on_screen.ravel().tolist())
+        return res
 
-    def __draw_faces(self):
-        # TODO
-        pass
+    def __draw_face(self, point_list: list):
+        self.__canvas.create_polygon(point_list, fill='blue', outline='black', width=1)
 
-    def __draw_vertex(self, x, z):
-        x, y = np.array([x, -z]) * self.GRID_SCALE + self.__window_origin
-        self.__canvas.create_rectangle(x - 1, y - 1, x + 1, y + 1, fill="black")
+    # def __draw_point(self, point):
+    #     x, y = point
+    #     self.__canvas.create_rectangle(x - 1, y - 1, x + 1, y + 1, fill="yellow")
 
     def get_canvas(self):
         return self.__canvas

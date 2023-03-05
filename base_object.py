@@ -4,8 +4,8 @@ from util import Util
 
 class BaseObject:
     def __init__(self, position=Util.WORLD_ORIGIN):
-        self.position = position
-        self.basis = np.array([Util.DIRECTION_X, Util.DIRECTION_Y, Util.DIRECTION_Z])
+        self.position = position    # position in world system
+        self.basis = np.array([Util.DIRECTION_X, Util.DIRECTION_Y, Util.DIRECTION_Z])   # direction in world system
         self.speed = 2
 
     def rotate(self, axis, degree):
@@ -13,16 +13,19 @@ class BaseObject:
         self._rotate_basis(R)
 
     def move(self, direction):
-        """direction vector is in local coordinate system"""
+        """direction vector is in world coordinate system"""
         self.position = self.position + direction * self.speed
 
     def x_direction(self):
+        """x direction in world system"""
         return self.basis[0]
 
     def y_direction(self):
+        """y direction in world system"""
         return self.basis[1]
 
     def z_direction(self):
+        """z direction in world system"""
         return self.basis[2]
 
     # this can be used by children class to handle rotation

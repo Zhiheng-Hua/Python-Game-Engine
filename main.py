@@ -14,4 +14,17 @@ from gui import GUI
 #
 # window.mainloop()
 
+# # create a new tkinter window
+# root = tk.Tk()
+# root.title("Polygon Drawing Example")
+# # create a new canvas to draw on
+# canvas = tk.Canvas(root, width=500, height=500)
+# canvas.pack()
+# # define the points of the polygon
+# points = np.array([[100, 100], [200, 100], [150, 200]]).tolist()
+# # draw the polygon on the canvas
+# canvas.create_polygon(points, fill='red', outline='black', width=2)
+# # start the main tkinter event loop
+# root.mainloop()
+
 GUI()

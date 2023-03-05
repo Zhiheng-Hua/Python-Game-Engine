@@ -4,21 +4,28 @@ from mesh_object import MeshObject
 from camera import Camera
 from util import Util
 
-test_object = MeshObject(vertices=np.array(
-    [[1, 1, 1],
-     [1, 1, -1],
-     [1, -1, 1],
-     [1, -1, -1],
-     [-1, 1, 1],
-     [-1, 1, -1],
-     [-1, -1, 1],
-     [-1, -1, -1]]
-))
+# test_object = MeshObject(vertices=np.array(
+#     [[1, 1, 1],
+#      [1, 1, -1],
+#      [1, -1, 1],
+#      [1, -1, -1],
+#      [-1, 1, 1],
+#      [-1, 1, -1],
+#      [-1, -1, 1],
+#      [-1, -1, -1]]
+# ), faces=np.array([
+#     [1, 3, 4, 2],
+#     [3, 7, 8, 4],
+#     [7, 5, 6, 8],
+#     [5, 1, 2, 6],
+#     [1, 5, 7, 3],
+#     [4, 8, 6, 2]
+# ]))
 
-# test_object = MeshObject(file_path='user/obj/chr_knight.obj')
-#
-# test_object.rotate(Util.DIRECTION_X, 45)
-# test_object.rotate(Util.DIRECTION_Y, 30)
+test_object = MeshObject(file_path='user/obj/chr_knight.obj')
+
+test_object.rotate(Util.DIRECTION_X, 45)
+test_object.rotate(Util.DIRECTION_Y, 30)
 
 class GUI:
     WINDOW_SIZE = (900, 600)  # width, height
