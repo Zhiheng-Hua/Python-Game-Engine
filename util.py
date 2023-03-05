@@ -10,23 +10,19 @@ class Util:
     WORLD_ORIGIN = np.zeros(3)
 
     @classmethod
-    def rotate_vector(cls, axis, degree, v):
-        """Rotates a vector around given axis"""
-        rad = np.radians(degree)
-        axis = axis / norm(axis)
-        qw = np.cos(rad / 2)
-        qx, qy, qz = axis * np.sin(rad / 2)
-        q = np.array([qw, qx, qy, qz])
-        rot_matrix = cls.__quaternion_rotation_matrix(q)
-        return np.dot(rot_matrix, v)
+    def rotated_row_vectors(cls, R, vectors):
+        """rotate all vectors in the array of (row) vectors"""
+        return (R @ vectors.T).T
 
     # reference: https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
     @classmethod
-    def __quaternion_rotation_matrix(cls, q):
-        """Converts a quaternion to a rotation matrix"""
-        w, x, y, z = q
-        n = norm(q)
-        s = 2.0 / (n * n)
+    def quaternion_rotation_matrix(cls, axis, degree):
+        """Converts axis and degree to rotation matrix"""
+        rad = np.radians(degree)
+        axis = axis / norm(axis)
+        w = np.cos(rad / 2)
+        x, y, z = axis * np.sin(rad / 2)
+        s = 2.0
         rot_matrix = np.array([
             [1 - s * (y * y + z * z), s * (x * y - z * w), s * (x * z + y * w)],
             [s * (x * y + z * w), 1 - s * (x * x + z * z), s * (y * z - x * w)],

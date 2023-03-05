@@ -3,18 +3,19 @@ import tkinter as tk
 from mesh_object import MeshObject
 from camera import Camera
 from util import Util
-from time import sleep
 
-test_object = MeshObject(vertices=np.array(
-    [[1, 1, 1],
-     [1, 1, -1],
-     [1, -1, 1],
-     [1, -1, -1],
-     [-1, 1, 1],
-     [-1, 1, -1],
-     [-1, -1, 1],
-     [-1, -1, -1]]
-))
+# test_object = MeshObject(vertices=np.array(
+#     [[1, 1, 1],
+#      [1, 1, -1],
+#      [1, -1, 1],
+#      [1, -1, -1],
+#      [-1, 1, 1],
+#      [-1, 1, -1],
+#      [-1, -1, 1],
+#      [-1, -1, -1]]
+# ))
+
+test_object = MeshObject(file_path='user/obj/chr_knight.obj')
 
 test_object.rotate(Util.DIRECTION_X, 45)
 test_object.rotate(Util.DIRECTION_Y, 30)
@@ -49,11 +50,11 @@ class GUI:
         self.__window.mainloop()
 
     def __init_events(self):
-        self.__window.bind('<KeyPress-Up>', lambda x: self.__main_camera.rotate(Util.DIRECTION_Y, 1))
-        self.__window.bind('<KeyPress-Left>', lambda x: self.__main_camera.rotate(Util.DIRECTION_Z, 1))
-        self.__window.bind('<KeyPress-Right>', lambda x: self.__main_camera.rotate(Util.DIRECTION_Z, -1))
-        self.__window.bind('<KeyPress-Down>', lambda x: self.__main_camera.rotate(Util.DIRECTION_Y, -1))
-        self.__window.bind('<KeyPress-a>', lambda x: self.__main_camera.move(-Util.DIRECTION_Y))
-        self.__window.bind('<KeyPress-d>', lambda x: self.__main_camera.move(Util.DIRECTION_Y))
-        self.__window.bind('<KeyPress-w>', lambda x: self.__main_camera.move(Util.DIRECTION_X))
-        self.__window.bind('<KeyPress-s>', lambda x: self.__main_camera.move(-Util.DIRECTION_X))
+        self.__window.bind('<KeyPress-Up>', lambda x: self.__objects[0].rotate(Util.DIRECTION_Y, 1))
+        self.__window.bind('<KeyPress-Left>', lambda x: self.__objects[0].rotate(Util.DIRECTION_Z, 1))
+        self.__window.bind('<KeyPress-Right>', lambda x: self.__objects[0].rotate(Util.DIRECTION_Z, -1))
+        self.__window.bind('<KeyPress-Down>', lambda x: self.__objects[0].rotate(Util.DIRECTION_Y, -1))
+        self.__window.bind('<KeyPress-a>', lambda x: self.__objects[0].move(-Util.DIRECTION_Y))
+        self.__window.bind('<KeyPress-d>', lambda x: self.__objects[0].move(Util.DIRECTION_Y))
+        self.__window.bind('<KeyPress-w>', lambda x: self.__objects[0].move(Util.DIRECTION_X))
+        self.__window.bind('<KeyPress-s>', lambda x: self.__objects[0].move(-Util.DIRECTION_X))

@@ -9,15 +9,16 @@ class BaseObject:
         self.speed = 2
 
     def rotate(self, axis, degree):
-        self._rotate_basis(axis, degree)
+        R = Util.quaternion_rotation_matrix(axis, degree)
+        self._rotate_basis(R)
 
     def move(self, direction):
         """direction vector is in local coordinate system"""
         self.position = self.position + self.basis.T @ (direction * self.speed)
 
     # this can be used by children class to handle rotation
-    def _rotate_basis(self, axis, degree):
-        self.basis = np.array([Util.rotate_vector(axis, degree, b) for b in self.basis])
+    def _rotate_basis(self, R):
+        self.basis = Util.rotated_row_vectors(R, self.basis)
 
     # """
     # public methods

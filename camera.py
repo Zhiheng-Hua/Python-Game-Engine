@@ -8,7 +8,7 @@ class Camera(BaseObject):
     CANVAS_SIZE = (700, 500)
     GRID_SCALE = 100
     DEFAULT_FOCAL_LENGTH = 20
-    DEFAULT_CAMERA_POSITION = np.array([-100, 10, 10])
+    DEFAULT_CAMERA_POSITION = np.array([-50, 0, 0])
 
     def __init__(self, root_window: tk.Tk, position=None):
         super().__init__(position if position else self.DEFAULT_CAMERA_POSITION)
@@ -22,10 +22,7 @@ class Camera(BaseObject):
         self.__canvas.delete("all")
         for obj in objects:
             pos = obj.position
-            for dv in obj.vertices:
-                v_world = pos + dv  # vertex coordinates in world system
-                v_local = self.basis.T @ (v_world - self.position)  # vertex coordinate in local (camera) system
-                x, y, z = v_local
+            for x, y, z in Util.rotated_row_vectors(self.basis.T, pos + obj.vertices - self.position):
                 ry, rz = self.__focal_length / x * np.array([y, z])
                 self.__draw_vertex(ry, rz)
 
