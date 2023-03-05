@@ -1,26 +1,31 @@
 import numpy as np
 import tkinter as tk
+from util import Util
+from base_object import BaseObject
 
 
-class Camera:
+class Camera(BaseObject):
     CANVAS_SIZE = (700, 500)
     GRID_SCALE = 100
     DEFAULT_FOCAL_LENGTH = 20
     DEFAULT_CAMERA_POSITION = np.array([-100, 10, 10])
 
     def __init__(self, root_window: tk.Tk, position=None):
+        super().__init__(position if position else self.DEFAULT_CAMERA_POSITION)
+
         self.__window = root_window
         self.__canvas = tk.Canvas(self.__window, bg="lightgrey", width=self.CANVAS_SIZE[0], height=self.CANVAS_SIZE[1])
-
-        self.__position = position if position else self.DEFAULT_CAMERA_POSITION    # position vector
         self.__focal_length = self.DEFAULT_FOCAL_LENGTH
         self.__window_origin = np.array(self.CANVAS_SIZE) / 2
 
-    def render_objects(self, objects):
+    def render(self, objects):
+        self.__canvas.delete("all")
         for obj in objects:
             pos = obj.position
-            for v in obj.mesh.vertices:
-                x, y, z = pos + v - self.__position
+            for dv in obj.vertices:
+                v_world = pos + dv  # vertex coordinates in world system
+                v_local = self.basis.T @ (v_world - self.position)  # vertex coordinate in local (camera) system
+                x, y, z = v_local
                 ry, rz = self.__focal_length / x * np.array([y, z])
                 self.__draw_vertex(ry, rz)
 

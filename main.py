@@ -14,5 +14,4 @@ from gui import GUI
 #
 # window.mainloop()
 
-gui = GUI()
-gui.start()
+GUI()

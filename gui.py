@@ -1,10 +1,11 @@
 import numpy as np
 import tkinter as tk
-from base_object import BaseObject
-from mesh import Mesh
+from mesh_object import MeshObject
 from camera import Camera
+from util import Util
+from time import sleep
 
-test_object = BaseObject(Mesh(vertices=np.array(
+test_object = MeshObject(vertices=np.array(
     [[1, 1, 1],
      [1, 1, -1],
      [1, -1, 1],
@@ -13,7 +14,10 @@ test_object = BaseObject(Mesh(vertices=np.array(
      [-1, 1, -1],
      [-1, -1, 1],
      [-1, -1, -1]]
-)))
+))
+
+test_object.rotate(Util.DIRECTION_X, 45)
+test_object.rotate(Util.DIRECTION_Y, 30)
 
 class GUI:
     WINDOW_SIZE = (900, 600)  # width, height
@@ -30,9 +34,26 @@ class GUI:
         self.__main_camera = Camera(self.__window)
         self.__main_camera.get_canvas().grid(column=0, row=0)
 
-    def __render(self):
-        self.__main_camera.render_objects(self.__objects)
+        # events
+        self.__init_events()
 
-    def start(self):
-        self.__render()
+        # start the program
+        self.__start()
+
+    def __update_display(self):
+        self.__main_camera.render(self.__objects)
+        self.__window.after(100, self.__update_display)
+
+    def __start(self):
+        self.__update_display()
         self.__window.mainloop()
+
+    def __init_events(self):
+        self.__window.bind('<KeyPress-Up>', lambda x: self.__main_camera.rotate(Util.DIRECTION_Y, 1))
+        self.__window.bind('<KeyPress-Left>', lambda x: self.__main_camera.rotate(Util.DIRECTION_Z, 1))
+        self.__window.bind('<KeyPress-Right>', lambda x: self.__main_camera.rotate(Util.DIRECTION_Z, -1))
+        self.__window.bind('<KeyPress-Down>', lambda x: self.__main_camera.rotate(Util.DIRECTION_Y, -1))
+        self.__window.bind('<KeyPress-a>', lambda x: self.__main_camera.move(-Util.DIRECTION_Y))
+        self.__window.bind('<KeyPress-d>', lambda x: self.__main_camera.move(Util.DIRECTION_Y))
+        self.__window.bind('<KeyPress-w>', lambda x: self.__main_camera.move(Util.DIRECTION_X))
+        self.__window.bind('<KeyPress-s>', lambda x: self.__main_camera.move(-Util.DIRECTION_X))
