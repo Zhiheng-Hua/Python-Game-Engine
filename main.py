@@ -4,7 +4,7 @@ from gui import GUI
 
 
 # window = tk.Tk()
-#
+
 # window.geometry('300x400')
 #
 # canvas = tk.Canvas(window, bg="white", width=700, height=500)
@@ -23,7 +23,8 @@ from gui import GUI
 # # define the points of the polygon
 # points = np.array([[100, 100], [200, 100], [150, 200]]).tolist()
 # # draw the polygon on the canvas
-# canvas.create_polygon(points, fill='red', outline='black', width=2)
+# canvas.create_polygon(points, fill='red', outline='black', width=2, tag='tag')
+#
 # # start the main tkinter event loop
 # root.mainloop()
 
