@@ -6,7 +6,7 @@ class BaseObject:
     def __init__(self, position=Util.WORLD_ORIGIN):
         self.position = position    # position in world system
         self.basis = np.array([Util.DIRECTION_X, Util.DIRECTION_Y, Util.DIRECTION_Z])   # direction in world system
-        self.speed = 2
+        self.speed = 1
 
     def rotate(self, axis, degree):
         R = Util.quaternion_rotation_matrix(axis, degree)

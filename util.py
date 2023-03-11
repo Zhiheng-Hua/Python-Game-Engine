@@ -104,8 +104,8 @@ class Util:
 
     @classmethod
     def parse_obj_file(cls, file_path):
-        vertices, faces, faces_color, faces_normal = [], [], [], []
-        vts, vns = [], []
+        vertices, normals, faces, faces_color, faces_vertex_normal = [], [], [], [], []
+        vts = []
         material = None
         current_dir = os.path.dirname(os.path.abspath(file_path))
         with open(file_path, 'r') as f:
@@ -117,7 +117,7 @@ class Util:
                 elif line.startswith('usemtl '):
                     curr_mat = line.split(' ')[1]
                 elif line.startswith('vn '):
-                    vns.append(list(map(float, line.split(' ')[1:])))
+                    normals.append(list(map(float, line.split(' ')[1:])))
                 elif line.startswith('vt '):
                     vts.append(list(map(float, line.split(' ')[1:])))
                 elif line.startswith('v '):
@@ -131,19 +131,19 @@ class Util:
                             temp_vt.append(int(ti) - 1)
                         temp_vn.append(int(ni) - 1)
                     faces.append(temp_v)
-                    faces_normal.append(temp_vn)    # this is only index for now
+                    faces_vertex_normal.append(temp_vn)
                     if material and vts and temp_vt:
                         faces_color.append(
                             Util.average_rgb_color(
                                 [cls.get_color_at_point(material[curr_mat]['image'], vts[idx]) for idx in temp_vt]
                             )
                         )
-        faces_normal = np.array([[vns[idx] for idx in vn] for vn in faces_normal])  # convert to actual normal vectors
         return {
-            'vertices': np.array(vertices), # np array
-            'faces': np.array(faces),       # np array
-            'faces_color': faces_color,     # list of 4-tuple (ambient, diffuse, specular, shininess) FIXME: update
-            'faces_normal': np.array(faces_normal) # np array
+            'vertices': np.array(vertices),
+            'normals': np.array(normals),
+            'faces': faces,                 # list of list of vertex coordinate indices
+            'faces_color': faces_color,     # list of RGB color string
+            'faces_vertex_normal': faces_vertex_normal  # list of list of vertex normal indices
         }
 
     @classmethod

@@ -34,13 +34,11 @@ class Camera(BaseObject):
     def __filter_faces(self, obj: MeshObject) -> Tuple[List[np.array], List[str]]:
         """filter faces to exclude back-facing faces, return list of faces in object's 3d coordinate system"""
         face_list, color_list = [], []
-        for idx, face in enumerate(obj.faces):
-            # face vertices in world coordinate
-            face_vertices = np.array([obj.vertices[i] for i in face]) + obj.position
-            # print(face_vertices)
-            f_normal = np.cross(face_vertices[1] - face_vertices[0], face_vertices[2] - face_vertices[1])
+        face_vertices = obj.faces_local()
+        for idx, vertex_normals in enumerate(obj.face_normals_local()):
+            f_normal = np.mean(vertex_normals, axis=0)
             if np.dot(self.y_direction(), f_normal) < 0:    # face toward each other
-                face_list.append(face_vertices)
+                face_list.append(face_vertices[idx])
                 color_list.append(obj.faces_color[idx])
         return face_list, color_list
 
@@ -61,10 +59,6 @@ class Camera(BaseObject):
 
     def __draw_face(self, point_list: list, color: str):
         self.__canvas.create_polygon(point_list, fill=color, outline='black', width=1)
-
-    # def __draw_point(self, point):
-    #     x, y = point
-    #     self.__canvas.create_rectangle(x - 1, y - 1, x + 1, y + 1, fill="yellow")
 
     def get_canvas(self):
         return self.__canvas

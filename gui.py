@@ -23,6 +23,7 @@ from util import Util
 # ]))
 
 test_object = MeshObject(file_path='user/obj/chr_knight.obj')
+# test_object = MeshObject(file_path='user/obj/3x3x3.obj')
 
 test_object.rotate(Util.DIRECTION_X, 45)
 test_object.rotate(Util.DIRECTION_Y, 30)
