@@ -1,6 +1,8 @@
+import os
 import numpy as np
 from numpy.linalg import norm
 from numpy import cos, sin
+from PIL import Image
 
 
 class Util:
@@ -32,7 +34,7 @@ class Util:
 
     # reference: https://en.wikipedia.org/wiki/Rotation_matrix
     @classmethod
-    def __euler_rotation_matrix(cls, degree_x, degree_y, degree_z):
+    def euler_rotation_matrix(cls, degree_x, degree_y, degree_z):
         """Converts rotation angles in degree to a rotation matrix"""
         alpha, beta, gamma = np.radians(degree_x), np.radians(degree_y), np.radians(degree_z)
         ca, sa = cos(alpha), sin(alpha)
@@ -83,3 +85,80 @@ class Util:
             bs += b
         avg_rgb = (round(rs / n), round(gs / n), round(bs / n))
         return cls.rgb_to_hex(avg_rgb)
+
+    @classmethod
+    def parse_obj_file(cls, file_path):
+        vertices, faces, faces_color = [], [], []
+        vts, vns = [], []
+        material = None
+        current_dir = os.path.dirname(os.path.abspath(file_path))
+        with open(file_path, 'r') as f:
+            curr_mat = None   # material name
+            for line in f.read().splitlines():
+                if line.startswith('mtllib '):
+                    material_file_path = os.path.join(current_dir, line.split(' ')[1])
+                    material = cls.parse_mtl_file(material_file_path)
+                elif line.startswith('usemtl '):
+                    curr_mat = line.split(' ')[1]
+                elif line.startswith('vn '):
+                    vns.append(list(map(float, line.split(' ')[1:])))
+                elif line.startswith('vt '):
+                    vts.append(list(map(float, line.split(' ')[1:])))
+                elif line.startswith('v '):
+                    vertices.append(list(map(float, line.split(' ')[1:])))
+                elif line.startswith('f '):
+                    temp_v, temp_vt, temp_vn = [], [], []
+                    for s in line.split(' ')[1:]:
+                        vi, ti, ni = s.split('/')   # format: vertex_index/texture_index/normal_index
+                        temp_v.append(int(vi) - 1)  # original obj file is 1-indexed
+                        if ti:
+                            temp_vt.append(int(ti) - 1)
+                        # temp_vn.append(ni)
+                    faces.append(temp_v)
+                    if material and vts and temp_vt:
+                        faces_color.append(
+                            Util.average_rgb_color(
+                                [cls.get_color_at_point(material[curr_mat]['image'], vts[idx]) for idx in temp_vt]
+                            )
+                        )
+        return {
+            'vertices': np.array(vertices), # np array
+            'faces': np.array(faces),       # np array
+            'faces_color': faces_color      # list of string
+        }
+
+    @classmethod
+    def parse_mtl_file(cls, file_path) -> dict:
+        current_dir = os.path.dirname(os.path.abspath(file_path))
+        res = {}    # material name -> info dict
+        with open(file_path, 'r') as f:
+            curr_mat = ''
+            for line in f.read().splitlines():
+                if line.startswith('newmtl '):
+                    curr_mat = line.split(' ')[1]
+                    res[curr_mat] = {
+                        'illum': 0,
+                        'map': '',
+                        'image': None,
+                        'Ka': np.zeros(3),
+                        'Kd': np.zeros(3),
+                        'Ks': np.zeros(3),
+                        'Ns': 0.0
+                    }
+                elif line.startswith('map_'):
+                    k, fp = line.split(' ')
+                    res[curr_mat]['map'] = k[4:]
+                    res[curr_mat]['image'] = Image.open(os.path.join(current_dir, fp)).convert("RGB")
+                elif line.startswith('illum '):
+                    res[curr_mat]['illum'] = int(line.split(' ')[1])
+                elif line.startswith('Ka ') or line.startswith('Kd ') or line.startswith('Ks '):
+                    line_arr = line.split(' ')
+                    res[curr_mat][line_arr[0]] = np.array(list(map(float, line_arr[1:])))
+        return res
+
+    @classmethod
+    def get_color_at_point(cls, image: Image, coord) -> str:
+        """x, y are normalized coordinates (between 0 and 1), return RGB color tuple"""
+        x, y = coord
+        width, height = image.size
+        return image.getpixel((x * width, y * height))
