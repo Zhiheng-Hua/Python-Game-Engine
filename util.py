@@ -5,11 +5,27 @@ from numpy import cos, sin
 from PIL import Image
 
 
+def normalize(v):
+    """Normalize a 3d vector v."""
+    norm = np.linalg.norm(v)
+    if norm == 0:
+        return v
+    return v / norm
+
+def reflect(v, n):
+    """Compute the reflection vector of a vector v around a normal vector n."""
+    return v - 2 * np.dot(v, n) * n
+
+
 class Util:
     DIRECTION_X = np.array([1, 0, 0])
     DIRECTION_Y = np.array([0, 1, 0])
     DIRECTION_Z = np.array([0, 0, 1])
     WORLD_ORIGIN = np.zeros(3)
+
+    La = np.array([1.0, 0.5, 0.0])  # bright orange ambient color
+    Ld = np.array([1.0, 1.0, 0.5])  # bright yellow diffuse color
+    Ls = np.array([1.0, 1.0, 1.0])  # white specular color
 
     @classmethod
     def rotated_row_vectors(cls, R, vectors):
@@ -88,7 +104,7 @@ class Util:
 
     @classmethod
     def parse_obj_file(cls, file_path):
-        vertices, faces, faces_color = [], [], []
+        vertices, faces, faces_color, faces_normal = [], [], [], []
         vts, vns = [], []
         material = None
         current_dir = os.path.dirname(os.path.abspath(file_path))
@@ -113,18 +129,21 @@ class Util:
                         temp_v.append(int(vi) - 1)  # original obj file is 1-indexed
                         if ti:
                             temp_vt.append(int(ti) - 1)
-                        # temp_vn.append(ni)
+                        temp_vn.append(int(ni) - 1)
                     faces.append(temp_v)
+                    faces_normal.append(temp_vn)    # this is only index for now
                     if material and vts and temp_vt:
                         faces_color.append(
                             Util.average_rgb_color(
                                 [cls.get_color_at_point(material[curr_mat]['image'], vts[idx]) for idx in temp_vt]
                             )
                         )
+        faces_normal = np.array([[vns[idx] for idx in vn] for vn in faces_normal])  # convert to actual normal vectors
         return {
             'vertices': np.array(vertices), # np array
             'faces': np.array(faces),       # np array
-            'faces_color': faces_color      # list of string
+            'faces_color': faces_color,     # list of 4-tuple (ambient, diffuse, specular, shininess) FIXME: update
+            'faces_normal': np.array(faces_normal) # np array
         }
 
     @classmethod
@@ -162,3 +181,11 @@ class Util:
         x, y = coord
         width, height = image.size
         return image.getpixel((x * width, y * height))
+
+    @classmethod
+    def rendered_face_color(cls, ambient_color, diffuse_color, specular_color, shininess,
+                            ambient_light, diffuse_light, specular_light,
+                            face_normal, light_normal, light_vector, view_vector):
+        return ambient_color * ambient_light + \
+        diffuse_color * diffuse_light * (max(np.dot(light_normal, light_vector), 0.0)) + \
+        specular_color * specular_light * (max(np.dot(reflect(-light_vector, face_normal), view_vector), 0.0) ** shininess)
