@@ -43,3 +43,43 @@ class Util:
             [cb * sg, sa * sb * sg + ca * cg, ca * sb * sg - sa * cg],
             [-sb, sa * cb, ca * cb]
         ])
+
+    @classmethod
+    def hex_to_rgb(cls, hex_code):
+        """hex_code: color string of format #RRGGBB"""
+        r = int(hex_code[1:3], 16)
+        g = int(hex_code[3:5], 16)
+        b = int(hex_code[5:7], 16)
+        return (r, g, b)
+
+    @classmethod
+    def rgb_to_hex(cls, rgb_tuple):
+        r_hex = hex(rgb_tuple[0])[2:].zfill(2)
+        g_hex = hex(rgb_tuple[1])[2:].zfill(2)
+        b_hex = hex(rgb_tuple[2])[2:].zfill(2)
+        return f"#{r_hex}{g_hex}{b_hex}"
+
+    @classmethod
+    def average_hex_color(cls, color_list):
+        """input list of #RRGGBB color string, output avg color string"""
+        n = len(color_list)
+        rs, gs, bs = 0, 0, 0
+        for color in color_list:
+            r, g, b = cls.hex_to_rgb(color)
+            rs += r
+            gs += g
+            bs += b
+        avg_rgb = (round(rs / n), round(gs / n), round(bs / n))
+        return cls.rgb_to_hex(avg_rgb)
+
+    @classmethod
+    def average_rgb_color(cls, color_list):
+        """input list of rgb color tuple, output avg color string"""
+        n = len(color_list)
+        rs, gs, bs = 0, 0, 0
+        for r, g, b in color_list:
+            rs += r
+            gs += g
+            bs += b
+        avg_rgb = (round(rs / n), round(gs / n), round(bs / n))
+        return cls.rgb_to_hex(avg_rgb)

@@ -1,7 +1,7 @@
 import numpy as np
 import tkinter as tk
 
-from typing import List
+from typing import List, Tuple
 
 from util import Util
 from base_object import BaseObject
@@ -27,38 +27,40 @@ class Camera(BaseObject):
     def render(self, objects):
         self.__canvas.delete("all")
         for obj in objects:
-            for pl in self.__object_face_list_to_render(obj):
-                self.__draw_face(pl)
+            faces, colors = self.__object_face_list_to_render(obj)
+            for point_list, color in zip(faces, colors):
+                self.__draw_face(point_list, color)
 
-    def __filter_faces(self, obj: MeshObject) -> List[np.array]:
+    def __filter_faces(self, obj: MeshObject) -> Tuple[List[np.array], List[str]]:
         """filter faces to exclude back-facing faces, return list of faces in object's 3d coordinate system"""
-        res = []
-        for face in obj.faces:
+        face_list, color_list = [], []
+        for idx, face in enumerate(obj.faces):
             # face vertices in world coordinate
-            face_vertices = np.array([obj.vertices[i - 1] for i in face]) + obj.position
+            face_vertices = np.array([obj.vertices[i] for i in face]) + obj.position
             # print(face_vertices)
             f_normal = np.cross(face_vertices[1] - face_vertices[0], face_vertices[2] - face_vertices[1])
             if np.dot(self.y_direction(), f_normal) < 0:    # face toward each other
-                res.append(face_vertices)
-        return res
+                face_list.append(face_vertices)
+                color_list.append(obj.faces_color[idx])
+        return face_list, color_list
 
-    def __object_face_list_to_render(self, obj: MeshObject) -> List[list]:
+    def __object_face_list_to_render(self, obj: MeshObject) -> Tuple[List[list], List[str]]:
         """return array of screen-coordinated faces[face_on_screen, ...] from a mesh object"""
-        face_list = self.__filter_faces(obj)
+        face_list, color_list = self.__filter_faces(obj)
         # convert faces in face_list to screen coordinate
-        res = []
+        res_faces = []
         for face_vertices in face_list:
             temp = []
             for x, y, z in Util.rotated_row_vectors(self.basis.T, obj.position + face_vertices - self.position):
                 if y <= 0:
-                    return []
+                    return ([], [])
                 temp.append([x / y, -z / y])
             face_on_screen = np.array(temp) * self.GRID_SCALE * self.__focal_length + self.__window_origin
-            res.append(face_on_screen.ravel().tolist())
-        return res
+            res_faces.append(face_on_screen.ravel().tolist())
+        return res_faces, color_list
 
-    def __draw_face(self, point_list: list):
-        self.__canvas.create_polygon(point_list, fill='blue', outline='black', width=1)
+    def __draw_face(self, point_list: list, color: str):
+        self.__canvas.create_polygon(point_list, fill=color, outline='black', width=1)
 
     # def __draw_point(self, point):
     #     x, y = point
