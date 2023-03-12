@@ -14,7 +14,9 @@ class BaseObject:
 
     def move(self, direction):
         """direction vector is in world coordinate system"""
+        print(self.position, '+', direction, '*', self.speed, '=', end=' ')
         self.position = self.position + direction * self.speed
+        print(self.position)
 
     def x_direction(self):
         """x direction in world system"""

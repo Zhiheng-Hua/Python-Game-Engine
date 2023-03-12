@@ -29,7 +29,7 @@ class Camera(BaseObject):
     def render(self, objects):
         self.__canvas.delete("all")
         for obj in objects:
-            faces, colors = self.__object_face_list_to_render(obj)
+            faces, colors = self.__project_object_to_screen(obj)
             for point_list, color in zip(faces, colors):
                 self.__draw_face(point_list, color)
 
@@ -43,19 +43,19 @@ class Camera(BaseObject):
         sorted_colors = [obj.faces_color[i] for i in sorted_face_indices]
         return sorted_faces, sorted_colors
 
-    def __object_face_list_to_render(self, obj: MeshObject) -> Tuple[List[list], List[str]]:
-        """return array of screen-coordinated faces[face_on_screen, ...] from a mesh object"""
+    def __project_object_to_screen(self, obj: MeshObject) -> Tuple[List[list], List[str]]:
+        """return array of screen-coordinated faces[face_on_screen, ...], color list from a mesh object"""
         face_list, color_list = self.__y_sort_faces(obj)
         # convert faces in face_list to screen coordinate
         res_faces = []
         for face_vertices in face_list:
             temp = []
-            for x, y, z in Util.rotated_row_vectors(self.basis.T, obj.position - self.position + face_vertices):
+            for x, y, z in Util.rotated_row_vectors(self.basis, obj.position - self.position + face_vertices):
                 if y <= 0:
                     return ([], [])
                 temp.append([x / y, -z / y])
             face_on_screen = self.GRID_SCALE * self.__focal_length * np.array(temp) + self.__window_origin
-            res_faces.append(face_on_screen.ravel().tolist())
+            res_faces.append(face_on_screen.tolist())
         return res_faces, color_list
 
     def __draw_face(self, point_list: list, color: str):
@@ -81,8 +81,8 @@ class Camera(BaseObject):
 
     def __left_drag_ctl(self, event):
         x, y = event.x, event.y
-        horizontal_rad_change = (x - self.__mouse_x) * self.HORIZONTAL_RAD_CHANGE_PER_PIXEL
-        vertical_rad_change = (y - self.__mouse_y) * self.VERTICAL_RAD_CHANGE_PER_PIXEL
+        horizontal_rad_change = (self.__mouse_x - x) * self.HORIZONTAL_RAD_CHANGE_PER_PIXEL
+        vertical_rad_change = (self.__mouse_y - y) * self.VERTICAL_RAD_CHANGE_PER_PIXEL
         self.rotate(self.z_direction(), horizontal_rad_change)
         self.rotate(self.x_direction(), vertical_rad_change)
         self.__mouse_x = x
