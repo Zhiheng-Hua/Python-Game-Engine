@@ -6,6 +6,7 @@ from typing import List, Tuple
 from util import Util
 from base_object import BaseObject
 from mesh_object import MeshObject
+from store import Store
 
 
 class Camera(BaseObject):
@@ -16,19 +17,21 @@ class Camera(BaseObject):
     HORIZONTAL_RAD_CHANGE_PER_PIXEL = 2/3 * np.pi / CANVAS_SIZE[0]
     VERTICAL_RAD_CHANGE_PER_PIXEL = 2/3 * np.pi / CANVAS_SIZE[1]
 
-    def __init__(self, root_window: tk.Tk, position=DEFAULT_CAMERA_POSITION):
+    def __init__(self, root_window: tk.Tk, store: Store, position=DEFAULT_CAMERA_POSITION):
         super().__init__(position)
 
-        self.__window = root_window
-        self.__canvas = tk.Canvas(self.__window, bg="lightgrey", width=self.CANVAS_SIZE[0], height=self.CANVAS_SIZE[1])
+        self.__store = store
+        self.__canvas = tk.Canvas(root_window, bg="lightgrey", width=self.CANVAS_SIZE[0], height=self.CANVAS_SIZE[1])
         self.__focal_length = self.DEFAULT_FOCAL_LENGTH
         self.__window_origin = np.array(self.CANVAS_SIZE) / 2
 
+        self.__is_showing = False
+
         self.__init_cam_control()
 
-    def render(self, objects):
+    def render(self):
         self.__canvas.delete("all")
-        for obj in objects:
+        for obj in self.__store.game_objects():
             faces, colors = self.__project_object_to_screen(obj)
             for point_list, color in zip(faces, colors):
                 self.__draw_face(point_list, color)
@@ -87,3 +90,18 @@ class Camera(BaseObject):
         self.rotate(self.x_direction(), vertical_rad_change)
         self.__mouse_x = x
         self.__mouse_y = y
+
+    def show(self):
+        self.__canvas.grid(column=0, row=0)
+        self.__is_showing = True
+        self.__update_display()
+
+    def hide(self):
+        self.__canvas.grid_forget()
+        self.__is_showing = False
+
+    def __update_display(self):
+        if self.__is_showing:
+            print(np.random.rand())
+            self.render()
+            self.__canvas.after(100, self.__update_display)

@@ -1,7 +1,9 @@
 import tkinter as tk
+import numpy as np
+
 from mesh_object import MeshObject
 from camera import Camera
-import numpy as np
+from store import Store
 
 
 test_object = MeshObject(file_path='user/obj/chr_knight.obj')
@@ -15,24 +17,23 @@ class GUI:
         self.__window.minsize(*self.WINDOW_SIZE)
         self.__window.maxsize(*self.WINDOW_SIZE)
 
-        # storage
-        self.__objects = [test_object]
+        self.__init_store()
 
         # main camera
-        self.__main_camera = Camera(self.__window)
-        self.__main_camera.get_canvas().grid(column=0, row=0)
+        self.__main_camera = Camera(self.__window, self.__store)
 
         self.__init_events()
 
         # start the program
         self.__start()
 
-    def __update_display(self):
-        self.__main_camera.render(self.__objects)
-        self.__window.after(100, self.__update_display)
+    def __init_store(self):
+        store = Store()
+        store.add_game_object(test_object)
+        self.__store = store
 
     def __start(self):
-        self.__update_display()
+        self.__main_camera.show()
         self.__window.mainloop()
 
     def __init_events(self):
