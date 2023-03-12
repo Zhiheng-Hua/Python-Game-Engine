@@ -30,7 +30,7 @@ class Camera(BaseObject):
                 self.__draw_face(point_list, color)
 
     def __y_sort_faces(self, obj: MeshObject) -> Tuple[List[np.array], List[str]]:
-        """filter faces to exclude back-facing faces, return list of faces in object's 3d coordinate system"""
+        """sort faces in camera coordinates in decreasing order in y direction"""
         face_vertices = obj.faces_local()
         # sort faces in cam coordinate in y direction (forward direction of camera)
         y_in_cam_coord = face_vertices[:,:,1] + (obj.position[1] - self.position[1])
