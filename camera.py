@@ -7,8 +7,6 @@ from util import Util
 from base_object import BaseObject
 from mesh_object import MeshObject
 
-from PIL import Image, ImageTk
-
 
 class Camera(BaseObject):
     CANVAS_SIZE = (700, 500)
@@ -34,9 +32,9 @@ class Camera(BaseObject):
     def __filter_faces(self, obj: MeshObject) -> Tuple[List[np.array], List[str]]:
         """filter faces to exclude back-facing faces, return list of faces in object's 3d coordinate system"""
         face_list, color_list = [], []
-        face_vertices = obj.faces_local()
-        for idx, vertex_normals in enumerate(obj.face_normals_local()):
-            f_normal = np.mean(vertex_normals, axis=0)
+        face_vertices = obj.faces_local() + obj.position
+        for idx, face in enumerate(face_vertices):
+            f_normal = np.cross(face[1] - face[0], face[2] - face[1])
             if np.dot(self.y_direction(), f_normal) < 0:    # face toward each other
                 face_list.append(face_vertices[idx])
                 color_list.append(obj.faces_color[idx])

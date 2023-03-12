@@ -27,6 +27,8 @@ class Util:
     Ld = np.array([1.0, 1.0, 0.5])  # bright yellow diffuse color
     Ls = np.array([1.0, 1.0, 1.0])  # white specular color
 
+    DEFAULT_FACE_COLOR = 'darkgrey'
+
     @classmethod
     def rotated_row_vectors(cls, R, vectors):
         """rotate all vectors in the array of (row) vectors"""
@@ -104,7 +106,7 @@ class Util:
 
     @classmethod
     def parse_obj_file(cls, file_path):
-        vertices, normals, faces, faces_color, faces_vertex_normal = [], [], [], [], []
+        vertices, faces, faces_color = [], [], []
         vts = []
         material = None
         current_dir = os.path.dirname(os.path.abspath(file_path))
@@ -112,38 +114,37 @@ class Util:
             curr_mat = None   # material name
             for line in f.read().splitlines():
                 if line.startswith('mtllib '):
-                    material_file_path = os.path.join(current_dir, line.split(' ')[1])
+                    material_file_path = os.path.join(current_dir, line.split()[1])
                     material = cls.parse_mtl_file(material_file_path)
                 elif line.startswith('usemtl '):
-                    curr_mat = line.split(' ')[1]
-                elif line.startswith('vn '):
-                    normals.append(list(map(float, line.split(' ')[1:])))
+                    curr_mat = line.split()[1]
                 elif line.startswith('vt '):
-                    vts.append(list(map(float, line.split(' ')[1:])))
+                    vts.append(list(map(float, line.split()[1:])))
                 elif line.startswith('v '):
-                    vertices.append(list(map(float, line.split(' ')[1:])))
+                    vertices.append(list(map(float, line.split()[1:])))
                 elif line.startswith('f '):
-                    temp_v, temp_vt, temp_vn = [], [], []
-                    for s in line.split(' ')[1:]:
-                        vi, ti, ni = s.split('/')   # format: vertex_index/texture_index/normal_index
+                    temp_v, temp_vt = [], []
+                    for s in line.split()[1:]:
+                        args = s.split('/')  # format: vertex_index/texture_index/normal_index
+                        vi = args[0]
                         temp_v.append(int(vi) - 1)  # original obj file is 1-indexed
-                        if ti:
-                            temp_vt.append(int(ti) - 1)
-                        temp_vn.append(int(ni) - 1)
+                        if len(args) >= 2:
+                            ti = args[1]
+                            if ti:
+                                temp_vt.append(int(ti) - 1)
                     faces.append(temp_v)
-                    faces_vertex_normal.append(temp_vn)
                     if material and vts and temp_vt:
                         faces_color.append(
                             Util.average_rgb_color(
                                 [cls.get_color_at_point(material[curr_mat]['image'], vts[idx]) for idx in temp_vt]
                             )
                         )
+                    else:
+                        faces_color.append(cls.DEFAULT_FACE_COLOR)
         return {
             'vertices': np.array(vertices),
-            'normals': np.array(normals),
             'faces': faces,                 # list of list of vertex coordinate indices
             'faces_color': faces_color,     # list of RGB color string
-            'faces_vertex_normal': faces_vertex_normal  # list of list of vertex normal indices
         }
 
     @classmethod
@@ -154,7 +155,7 @@ class Util:
             curr_mat = ''
             for line in f.read().splitlines():
                 if line.startswith('newmtl '):
-                    curr_mat = line.split(' ')[1]
+                    curr_mat = line.split()[1]
                     res[curr_mat] = {
                         'illum': 0,
                         'map': '',
@@ -165,13 +166,13 @@ class Util:
                         'Ns': 0.0
                     }
                 elif line.startswith('map_'):
-                    k, fp = line.split(' ')
+                    k, fp = line.split()
                     res[curr_mat]['map'] = k[4:]
                     res[curr_mat]['image'] = Image.open(os.path.join(current_dir, fp)).convert("RGB")
                 elif line.startswith('illum '):
-                    res[curr_mat]['illum'] = int(line.split(' ')[1])
+                    res[curr_mat]['illum'] = int(line.split()[1])
                 elif line.startswith('Ka ') or line.startswith('Kd ') or line.startswith('Ks '):
-                    line_arr = line.split(' ')
+                    line_arr = line.split()
                     res[curr_mat][line_arr[0]] = np.array(list(map(float, line_arr[1:])))
         return res
 
