@@ -29,20 +29,19 @@ class Camera(BaseObject):
             for point_list, color in zip(faces, colors):
                 self.__draw_face(point_list, color)
 
-    def __filter_faces(self, obj: MeshObject) -> Tuple[List[np.array], List[str]]:
+    def __y_sort_faces(self, obj: MeshObject) -> Tuple[List[np.array], List[str]]:
         """filter faces to exclude back-facing faces, return list of faces in object's 3d coordinate system"""
-        face_list, color_list = [], []
-        face_vertices = obj.faces_local() + obj.position
-        for idx, face in enumerate(face_vertices):
-            f_normal = np.cross(face[1] - face[0], face[2] - face[1])
-            if np.dot(self.y_direction(), f_normal) < 0:    # face toward each other
-                face_list.append(face_vertices[idx])
-                color_list.append(obj.faces_color[idx])
-        return face_list, color_list
+        face_vertices = obj.faces_local()
+        # sort faces in cam coordinate in y direction (forward direction of camera)
+        y_in_cam_coord = face_vertices[:,:,1] + (obj.position[1] - self.position[1])
+        sorted_face_indices = np.argsort(np.mean(-y_in_cam_coord, axis=1))
+        sorted_faces = face_vertices[sorted_face_indices].tolist()
+        sorted_colors = [obj.faces_color[i] for i in sorted_face_indices]
+        return sorted_faces, sorted_colors
 
     def __object_face_list_to_render(self, obj: MeshObject) -> Tuple[List[list], List[str]]:
         """return array of screen-coordinated faces[face_on_screen, ...] from a mesh object"""
-        face_list, color_list = self.__filter_faces(obj)
+        face_list, color_list = self.__y_sort_faces(obj)
         # convert faces in face_list to screen coordinate
         res_faces = []
         for face_vertices in face_list:
