@@ -97,11 +97,10 @@ class Camera(BaseObject):
         self.__update_display()
 
     def hide(self):
-        self.__canvas.grid_forget()
+        self.__canvas.pack_forget()
         self.__is_showing = False
 
     def __update_display(self):
         if self.__is_showing:
-            print(np.random.rand())
             self.render()
             self.__canvas.after(100, self.__update_display)

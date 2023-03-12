@@ -1,6 +1,6 @@
 import tkinter as tk
 import numpy as np
-from gui import GUI
+from app import App
 
 
 # window = tk.Tk()
@@ -28,4 +28,4 @@ from gui import GUI
 # # start the main tkinter event loop
 # root.mainloop()
 
-GUI()
+App()

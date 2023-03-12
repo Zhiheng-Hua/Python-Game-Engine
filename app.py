@@ -4,12 +4,13 @@ import numpy as np
 from mesh_object import MeshObject
 from camera import Camera
 from store import Store
+from components.graphics import Graphics
 
 
 test_object = MeshObject(file_path='user/obj/chr_knight.obj')
 test_object.rotate(test_object.x_direction(), np.pi / 2)
 
-class GUI:
+class App:
     WINDOW_SIZE = (900, 600)  # width, height
 
     def __init__(self):
@@ -34,6 +35,7 @@ class GUI:
 
     def __start(self):
         self.__main_camera.show()
+        self.__main_camera.get_canvas().focus_set()
         self.__window.mainloop()
 
     def __init_events(self):
@@ -41,6 +43,4 @@ class GUI:
         self.__window.bind_all('<Button-3>', self.__focus_handler)
 
     def __focus_handler(self, event):
-        widget = event.widget
-        widget.focus_get()
-        widget.focus_set()
+        event.widget.focus_set()
