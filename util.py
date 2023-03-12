@@ -1,6 +1,5 @@
 import os
 import numpy as np
-from numpy.linalg import norm
 from numpy import cos, sin
 from PIL import Image
 
@@ -39,14 +38,17 @@ class Util:
     def quaternion_rotation_matrix(cls, axis, degree):
         """Converts axis and degree to rotation matrix"""
         rad = np.radians(degree)
-        axis = axis / norm(axis)
+        axis = normalize(axis)
         w = np.cos(rad / 2)
         x, y, z = axis * np.sin(rad / 2)
-        s = 2.0
+        xw, yw, zw = x * w, y * w, z * w
+        xx, xy, xz = x * x, x * y, x * z
+        yy, yz = y * y, y * z
+        zz = z * z
         rot_matrix = np.array([
-            [1 - s * (y * y + z * z), s * (x * y - z * w), s * (x * z + y * w)],
-            [s * (x * y + z * w), 1 - s * (x * x + z * z), s * (y * z - x * w)],
-            [s * (x * z - y * w), s * (y * z + x * w), 1 - s * (x * x + y * y)]
+            [1 - 2 * (yy + zz), 2 * (xy - zw), 2 * (xz + yw)],
+            [2 * (xy + zw), 1 - 2 * (xx + zz), 2 * (yz - xw)],
+            [2 * (xz - yw), 2 * (yz + xw), 1 - 2 * (xx + yy)]
         ])
         return rot_matrix
 

@@ -4,8 +4,8 @@ from util import Util
 
 
 class MeshObject(BaseObject):
-    def __init__(self, file_path):
-        super().__init__()
+    def __init__(self, file_path, position=Util.WORLD_ORIGIN):
+        super().__init__(position)
         self.__init_from_obj_file(file_path)
 
     def rotate(self, axis, degree):
@@ -21,4 +21,4 @@ class MeshObject(BaseObject):
 
     def faces_local(self):
         """return array of array of vertices vectors"""
-        return self.vertices[self.faces]
+        return np.array([[self.vertices[i] for i in face] for face in self.faces])
