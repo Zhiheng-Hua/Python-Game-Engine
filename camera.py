@@ -83,7 +83,7 @@ class Camera(BaseObject):
         x, y = event.x, event.y
         horizontal_rad_change = (self.__mouse_x - x) * self.HORIZONTAL_RAD_CHANGE_PER_PIXEL
         vertical_rad_change = (self.__mouse_y - y) * self.VERTICAL_RAD_CHANGE_PER_PIXEL
-        self.rotate(self.z_direction(), horizontal_rad_change)
+        self.rotate(Util.DIRECTION_Z, horizontal_rad_change)
         self.rotate(self.x_direction(), vertical_rad_change)
         self.__mouse_x = x
         self.__mouse_y = y
