@@ -30,14 +30,13 @@ class Util:
 
     @classmethod
     def rotated_row_vectors(cls, R, vectors):
-        """rotate all vectors in the array of (row) vectors"""
+        """rotate all vectors in the array of (row) vectors using rotation matrix R"""
         return (R @ vectors.T).T
 
     # reference: https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
     @classmethod
-    def quaternion_rotation_matrix(cls, axis, degree):
-        """Converts axis and degree to rotation matrix"""
-        rad = np.radians(degree)
+    def quaternion_rotation_matrix(cls, axis, rad):
+        """Converts axis and rad to rotation matrix"""
         axis = normalize(axis)
         w = np.cos(rad / 2)
         x, y, z = axis * np.sin(rad / 2)

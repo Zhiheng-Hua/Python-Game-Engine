@@ -1,11 +1,11 @@
 import tkinter as tk
 from mesh_object import MeshObject
 from camera import Camera
+import numpy as np
 
 
-test_object1 = MeshObject(file_path='user/obj/chr_knight.obj')
-test_object2 = MeshObject(file_path='user/obj/3x3x3.obj')
-
+test_object = MeshObject(file_path='user/obj/chr_knight.obj')
+test_object.rotate(test_object.x_direction(), np.pi / 2)
 
 class GUI:
     WINDOW_SIZE = (900, 600)  # width, height
@@ -16,13 +16,12 @@ class GUI:
         self.__window.maxsize(*self.WINDOW_SIZE)
 
         # storage
-        self.__objects = [test_object1]
+        self.__objects = [test_object]
 
         # main camera
         self.__main_camera = Camera(self.__window)
         self.__main_camera.get_canvas().grid(column=0, row=0)
 
-        # events
         self.__init_events()
 
         # start the program
@@ -37,11 +36,10 @@ class GUI:
         self.__window.mainloop()
 
     def __init_events(self):
-        self.__window.bind('<KeyPress-Up>', lambda x: self.__objects[0].rotate(self.__objects[0].x_direction(), 1))
-        self.__window.bind('<KeyPress-Down>', lambda x: self.__objects[0].rotate(self.__objects[0].x_direction(), -1))
-        self.__window.bind('<KeyPress-Left>', lambda x: self.__objects[0].rotate(self.__objects[0].z_direction(), 1))
-        self.__window.bind('<KeyPress-Right>', lambda x: self.__objects[0].rotate(self.__objects[0].z_direction(), -1))
-        self.__window.bind('<KeyPress-w>', lambda x: self.__objects[0].move(self.__objects[0].y_direction()))
-        self.__window.bind('<KeyPress-s>', lambda x: self.__objects[0].move(-self.__objects[0].y_direction()))
-        self.__window.bind('<KeyPress-a>', lambda x: self.__objects[0].move(-self.__objects[0].x_direction()))
-        self.__window.bind('<KeyPress-d>', lambda x: self.__objects[0].move(self.__objects[0].x_direction()))
+        self.__window.bind_all('<Button-1>', self.__focus_handler)
+        self.__window.bind_all('<Button-3>', self.__focus_handler)
+
+    def __focus_handler(self, event):
+        widget = event.widget
+        widget.focus_get()
+        widget.focus_set()

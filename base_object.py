@@ -8,8 +8,8 @@ class BaseObject:
         self.basis = np.array([Util.DIRECTION_X, Util.DIRECTION_Y, Util.DIRECTION_Z])   # direction in world system
         self.speed = 1
 
-    def rotate(self, axis, degree):
-        R = Util.quaternion_rotation_matrix(axis, degree)
+    def rotate(self, axis, rad):
+        R = Util.quaternion_rotation_matrix(axis, rad)
         self._rotate_basis(R)
 
     def move(self, direction):
