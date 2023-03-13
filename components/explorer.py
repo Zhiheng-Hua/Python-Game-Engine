@@ -1,14 +1,32 @@
 import tkinter as tk
 from tkinter import ttk
 
-class Explorer():
-    def __init__(self, master):
-        self.__tree = ttk.Treeview(master)
-        self.__tree.heading("#0", text="Game Objects", anchor='w')
-        self.__tree.column("#0", stretch=True)
+from store import Store
 
+
+class Explorer(tk.Frame):
+    def __init__(self, master: tk.Tk, store: Store, **kwargs):
+        super().__init__(master, **kwargs)
+        self.__init_tree()
         self.__init_menu()
         self.__init_events()
+
+        self.__store = store
+
+        for i in range(20):
+            self.__tree.insert('', "end", text='New File')
+
+    def __init_tree(self):
+        self.__tree = ttk.Treeview(self)
+
+        self.__tree.heading("#0", text="Game Objects", anchor='w')
+        self.__tree.column("#0", stretch=True)
+        self.__tree.pack(side='left', fill='both')
+
+        scrollbar = tk.Scrollbar(self)
+        scrollbar.pack(side='right', fill='y')
+        scrollbar.configure(command=self.__tree.yview)
+        self.__tree.configure(yscrollcommand=scrollbar.set)
 
     def __init_menu(self):
         self.__menu = tk.Menu(self.__tree, tearoff=0)     # right click menu

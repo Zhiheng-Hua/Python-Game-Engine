@@ -17,11 +17,11 @@ class Camera(BaseObject):
     HORIZONTAL_RAD_CHANGE_PER_PIXEL = 2/3 * np.pi / CANVAS_SIZE[0]
     VERTICAL_RAD_CHANGE_PER_PIXEL = 2/3 * np.pi / CANVAS_SIZE[1]
 
-    def __init__(self, root_window: tk.Tk, store: Store, position=DEFAULT_CAMERA_POSITION):
+    def __init__(self, master, store: Store, position=DEFAULT_CAMERA_POSITION):
         super().__init__(position)
 
         self.__store = store
-        self.__canvas = tk.Canvas(root_window, bg="lightgrey", width=self.CANVAS_SIZE[0], height=self.CANVAS_SIZE[1])
+        self.__canvas = tk.Canvas(master, bg="lightgrey", width=self.CANVAS_SIZE[0], height=self.CANVAS_SIZE[1])
         self.__focal_length = self.DEFAULT_FOCAL_LENGTH
         self.__window_origin = np.array(self.CANVAS_SIZE) / 2
 
@@ -92,7 +92,7 @@ class Camera(BaseObject):
         self.__mouse_y = y
 
     def show(self):
-        self.__canvas.grid(column=0, row=0)
+        self.__canvas.pack(fill=tk.BOTH, expand=True)
         self.__is_showing = True
         self.__update_display()
 
